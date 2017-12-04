@@ -126,6 +126,22 @@
   are printed as a flat expression with the environment printed below.
   Previously they would appear as formulas.
 
+* Quosures are no longer formulas. They are now calls to inlined
+  functions, which makes them compatible with `base::eval()` (though
+  they only support auxiliary data with `eval_tidy()`). This
+  implementation makes more sense and makes it possible for quosures
+  to be evaluated in their original environment when there is no
+  overscope (e.g. `eval_tidy()` is called without `data`). This is a
+  breaking change, see below.
+
+* Thanks to the new quosure implementation, `eval_tidy()` and the
+  evaluation of quosures is now much faster when no data is supplied.
+
+* The quosure print method is not invoked when printing raw
+  expressions. This means that `expr(foo(!! quo(bar)))` now displays
+  strangely. This is a downside of switching from formulas to embedded
+  functions for the implementation of quosures.
+
 
 ## Breaking changes
 
@@ -143,13 +159,15 @@
 * `as_overscope()` no longer takes a quosure as first argument. It is
   used to transform a data vector into an overscope.
 
-* Quosures are no longer a subclass of formula. They are now calls to
-  inlined functions, which makes them compatible with `base::eval()`
-  (though they only support auxiliary data with `eval_tidy()`). Note
-  that the R printer currently suffers from a bug that causes quosures
-  to evaluate during printing when they are wrapped in a list. To work
-  around this, pass your lists of quosures to `new_quosures()`.  The
-  lists returned by `quos()` are not affected.
+* Quosures are no longer a subclass of formula. You can no longer
+  retrieve the expression or the environment with `f_expr()` or
+  `f_env()`. In general please use `get_expr()` and `get_env()` to
+  protect yourself from internal changes.
+
+  Note that the R printer currently suffers from a bug that causes
+  quosures to evaluate during printing when they are wrapped in a
+  list. To work around this, pass your lists of quosures to
+  `new_quosures()`. The lists returned by `quos()` are not affected.
 
 
 # rlang 0.1.4
