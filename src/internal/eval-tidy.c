@@ -7,12 +7,12 @@ static sexp* tilde_thunk_body = NULL;
 
 sexp* new_tilde_thunk(sexp* data_mask, sexp* data_mask_top) {
   sexp* body = KEEP(r_duplicate(tilde_thunk_body, false));
-  sexp* fn = KEEP(r_new_function(tilde_thunk_fmls, body, r_base_env));
 
   sexp* args = r_node_cdr(r_node_cddr(body));
   r_node_poke_car(args, data_mask);
   r_node_poke_cadr(args, data_mask_top);
 
+  sexp* fn = KEEP(r_new_function(tilde_thunk_fmls, body, r_base_env));
   FREE(2);
   return fn;
 }
